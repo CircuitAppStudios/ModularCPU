@@ -11,6 +11,7 @@ std::vector<unsigned char> parseCode(std::string code);
 bool processForInstruction(std::string token);
 unsigned char getInstructionOpcode(std::string instruction);
 
+// TODO: Fix timer for Windows as High_Resolution_Clock is accurate to about a millisecond
 int main(int argc, char* argv[]) {
     //std::string testASM = "mov raa, 5\n"
     //                      "mov rab, 5";
@@ -20,12 +21,17 @@ int main(int argc, char* argv[]) {
     if(argc <= 1){
         std::cout << "Usage: ./ModularCPU <aasm code>";
     }else{
+        std::cout << "Processing File at: " << argv[1] << "\n" << std::endl;
         std::filebuf codeBuffer;
         if(codeBuffer.open(argv[1], std::ios::in)){
             std::istream codeStream(&codeBuffer);
             std::string temp(std::istreambuf_iterator<char>(codeStream), {});
             Code = temp;
             codeBuffer.close();
+        }
+
+        if(Code.empty()){
+            std::cout << "Error, file is blank" << std::endl;
         }
     }
 
@@ -89,7 +95,6 @@ std::vector<unsigned char> parseCode(std::string code){
         if(processForInstruction(tokens[i])){
             parsedCode.push_back(getInstructionOpcode(tokens[i]));
         }/*else if(processForLabel(tokens[i])){
-
         }*/
 
     }
