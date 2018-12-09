@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Timer.h"
+#include "Logger.h"
 
 #define byteCode std::vector<unsigned char>
 
@@ -11,13 +12,15 @@ std::vector<unsigned char> parseCode(std::string code);
 bool processForInstruction(std::string token);
 unsigned char getInstructionOpcode(std::string instruction);
 
+Logger logger;
+
 bool allDebug = false;
 
 void checkForFlags(const char* value);
 
 void checkForFlags(const char* value){
     if(strncmp(value, "-wall", 10) == 0){
-        allDebug = true;
+        logger.setDebug();
     }
 }
 
@@ -35,9 +38,8 @@ int main(int argc, char* argv[]) {
     if(argc <= 1){
         std::cout << "Usage: ./ModularCPU <aasm code> <flags>";
     }else{
-        if(allDebug) {
-            std::cout << "Processing File at: " << argv[1] << "\n" << std::endl;
-        }
+        logger.print(std::string("Processing File at: ") + argv[1] + "\n");
+
         std::filebuf codeBuffer;
         if(codeBuffer.open(argv[1], std::ios::in)){
             std::istream codeStream(&codeBuffer);
@@ -59,41 +61,33 @@ int main(int argc, char* argv[]) {
 }
 
 std::vector<unsigned char> parseCode(std::string code){
-    if(allDebug) {
-        std::cout << "Parsing Code" << std::endl;
-        std::cout << "------------" << std::endl;
-    }
+    logger.print(std::string("Parsing Code") + "\n" + "------------");
+
     std::vector <std::string> lines;
     std::vector <std::string> tokens;
     std::vector <unsigned char> parsedCode;
 
     std::stringstream codeStream(code);
     std::string intermediate;
-    Timer timer;
 
-    if(allDebug) {
-        timer.Start();
-    }
+    logger.startTimer();
 
     while (std::getline(codeStream, intermediate, '\n')){
         lines.push_back(intermediate);
     }
 
-    if(allDebug) {
-        timer.Stop();
-        std::cout << "Processing Code / Lines took " << timer.elapsedNanoseconds() << " ns" << std::endl;
-        std::cout << "File has " << lines.size() << " lines" << "\n" << std::endl;
+    logger.endTimer();
+    logger.print("Processing Code / Lines took " + logger.elapsedNanoseconds() + " ns");
+    logger.print("File has " + std::to_string(lines.size()) + " lines\n");
 
-        std::cout << "Printing Lines" << std::endl;
-        std::cout << "--------------\n" << std::endl;
+    logger.print("Printing Lines");
+    logger.print("--------------");
 
-        timer.Start();
-    }
+    logger.startTimer();
 
     for(int i = 0; lines.size() > i; i++){
-        if(allDebug) {
-            std::cout << "Line " << i + 1 << ". " << lines[i] << std::endl;
-        }
+        logger.print("Line " + std::to_string(i + 1) + ". " + lines[i]);
+
         std::stringstream lineStream(lines[i]);
 
         while(std::getline(lineStream, intermediate, ' ')){
@@ -101,22 +95,22 @@ std::vector<unsigned char> parseCode(std::string code){
         }
     }
 
-    if(allDebug) {
-        timer.Stop();
-        std::cout << "Separating Tokens took " << timer.elapsedNanoseconds() << " ns" << std::endl;
+    Timer timer;
 
-        std::cout << "\nPrinting Tokens" << std::endl;
-        std::cout << "---------------\n" << std::endl;
+    logger.endTimer();
+    logger.print("Separating Tokens took " + logger.elapsedNanoseconds() + " ns\n");
 
-        for (int i = 0; tokens.size() > i; i++) {
-            std::cout << tokens[i] << std::endl;
-        }
+    logger.print("\nPrinting Tokens");
+    logger.print("---------------");
 
-        std::cout << "\nCleaning Tokens" << std::endl;
-        std::cout << "---------------\n" << std::endl;
-
-        timer.Start();
+    for (int i = 0; tokens.size() > i; i++) {
+        logger.print(tokens[i]);
     }
+
+    logger.print("\nCleaning Tokens");
+    logger.print("---------------");
+
+    logger.startTimer();
 
     for(int i = 0; tokens.size() > i; i++){
         std::stringstream tokenStream(tokens[i]);
@@ -126,15 +120,13 @@ std::vector<unsigned char> parseCode(std::string code){
         }
     }
 
-    if(allDebug) {
-        timer.Stop();
-        std::cout << "Cleaning Tokens took " << timer.elapsedNanoseconds() << " ns" << std::endl;
+    logger.endTimer();
+    logger.print("Cleaning Tokens took " + logger.elapsedNanoseconds() + " ns");
 
-        std::cout << "\nProcessing Tokens" << std::endl;
-        std::cout << "-----------------\n" << std::endl;
+    logger.print("\nProcessing Tokens");
+    logger.print("-----------------");
 
-        timer.Start();
-    }
+    logger.startTimer();
 
     for(int i = 0; tokens.size() > i; i++){
         if(processForInstruction(tokens[i])){
@@ -144,10 +136,8 @@ std::vector<unsigned char> parseCode(std::string code){
 
     }
 
-    if(allDebug) {
-        timer.Stop();
-        std::cout << "Processing Tokens took " << timer.elapsedNanoseconds() << " ns" << std::endl;
-    }
+    logger.endTimer();
+    logger.print("Processing Tokens took " + logger.elapsedNanoseconds() + " ns");
 
     return parsedCode;
 }
