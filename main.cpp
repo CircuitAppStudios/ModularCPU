@@ -1,60 +1,9 @@
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <vector>
-#include <chrono>
 
-class Timer{
-public:
-    void Start(){
-        m_StartTime = std::chrono::high_resolution_clock::now();
-        m_isRunning = true;
-    }
-
-    void Stop(){
-        m_EndTime = std::chrono::high_resolution_clock::now();
-        m_isRunning = true;
-    }
-
-    double elapsedNanoseconds(){
-        std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
-
-        if(m_isRunning)
-        {
-            endTime = std::chrono::high_resolution_clock::now();
-        }
-        else
-        {
-            endTime = m_EndTime;
-        }
-
-        return std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - m_StartTime).count();
-    }
-
-    double elapsedMilliseconds(){
-        std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
-
-        if(m_isRunning)
-        {
-            endTime = std::chrono::high_resolution_clock::now();
-        }
-        else
-        {
-            endTime = m_EndTime;
-        }
-
-        return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - m_StartTime).count();
-    }
-
-    double elapsedSeconds()
-    {
-        return elapsedMilliseconds() / 1000.0;
-    }
-
-private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTime;
-    std::chrono::time_point<std::chrono::high_resolution_clock> m_EndTime;
-    bool m_isRunning = false;
-};
+#include "Timer.h"
 
 #define byteCode std::vector<unsigned char>
 
@@ -62,11 +11,26 @@ std::vector<unsigned char> parseCode(std::string code);
 bool processForInstruction(std::string token);
 unsigned char getInstructionOpcode(std::string instruction);
 
-int main() {
-    std::string testASM = "mov raa, 5\n"
-                          "mov rab, 5";
+int main(int argc, char* argv[]) {
+    //std::string testASM = "mov raa, 5\n"
+    //                      "mov rab, 5";
 
-    byteCode bCode = parseCode(testASM);
+    std::string Code;
+
+    if(argc <= 1){
+        std::cout << "Usage: ./ModularCPU <aasm code>";
+    }else{
+        std::filebuf codeBuffer;
+        if(codeBuffer.open(argv[1], std::ios::in)){
+            std::istream codeStream(&codeBuffer);
+            std::string temp(std::istreambuf_iterator<char>(codeStream), {});
+            Code = temp;
+            codeBuffer.close();
+        }
+    }
+
+    //byteCode bCode = parseCode(testASM);
+    byteCode bCode = parseCode(Code);
     //emualteBytecode(bCode, configuration);
 
     return 0;
