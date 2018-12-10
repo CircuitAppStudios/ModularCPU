@@ -3,7 +3,6 @@
 #include <sstream>
 #include <vector>
 
-#include "Timer.h"
 #include "Logger.h"
 
 #define byteCode std::vector<unsigned char>
@@ -12,23 +11,18 @@ std::vector<unsigned char> parseCode(std::string code);
 bool processForInstruction(std::string token);
 unsigned char getInstructionOpcode(std::string instruction);
 
-Logger logger;
-
-bool allDebug = false;
+static Logger logger;
 
 void checkForFlags(const char* value);
 
 void checkForFlags(const char* value){
-    if(strncmp(value, "-wall", 10) == 0){
+    if(strncmp(value, "-dall", 10) == 0){
         logger.setDebug();
     }
 }
 
 // TODO: Fix timer for Windows as High_Resolution_Clock is accurate to about a millisecond on Windows
 int main(int argc, char* argv[]) {
-    //std::string testASM = "mov raa, 5\n"
-    //                      "mov rab, 5";
-
     std::string Code;
 
     for(int i = 2; i < argc; i++){

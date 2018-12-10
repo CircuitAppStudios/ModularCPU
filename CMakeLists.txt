@@ -3,4 +3,4 @@ project(ModularCPU)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(ModularCPU main.cpp Timer.cpp Timer.h Logger.cpp Logger.h)
+add_executable(ModularCPU main.cpp Timer.cpp Timer.h Logger.cpp Logger.h Token.cpp Token.h)
